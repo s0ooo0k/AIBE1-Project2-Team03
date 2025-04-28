@@ -1,10 +1,8 @@
 package aibe.hosik.post.entity;
 
+import aibe.hosik.common.TimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -13,7 +11,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @Getter
-public class Post {
+@Setter
+public class Post extends TimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

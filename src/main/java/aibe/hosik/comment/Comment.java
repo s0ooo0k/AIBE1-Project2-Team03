@@ -1,5 +1,6 @@
 package aibe.hosik.comment;
 
+import aibe.hosik.common.TimeEntity;
 import aibe.hosik.post.entity.Post;
 import aibe.hosik.user.User;
 import jakarta.persistence.*;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
-public class Comment {
+public class Comment extends TimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

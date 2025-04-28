@@ -1,5 +1,6 @@
 package aibe.hosik.resume;
 
+import aibe.hosik.common.TimeEntity;
 import aibe.hosik.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
-public class Resume {
+public class Resume extends TimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
