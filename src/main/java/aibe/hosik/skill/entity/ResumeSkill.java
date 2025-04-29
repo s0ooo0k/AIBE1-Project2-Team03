@@ -1,6 +1,7 @@
 package aibe.hosik.skill.entity;
 
 import aibe.hosik.profile.Profile;
+import aibe.hosik.resume.Resume;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,13 +13,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Getter
-public class ProfileSkill {
+public class ResumeSkill {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  private Profile profile;
+  private Resume resume;
 
   @ManyToOne(fetch = FetchType.LAZY)
   private Skill skill;

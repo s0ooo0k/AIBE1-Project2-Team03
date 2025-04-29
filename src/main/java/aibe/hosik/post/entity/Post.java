@@ -24,7 +24,11 @@ public class Post extends TimeEntity {
   private String content;
 
   @Column
-  private boolean isProgress;
+  @Builder.Default
+  private boolean isDone = false;
+
+  @Column
+  private int headCount;
 
   @Column
   private String image;
@@ -35,4 +39,8 @@ public class Post extends TimeEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private PostCategory category;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private PostType type;
 }

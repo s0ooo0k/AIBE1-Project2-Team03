@@ -22,6 +22,9 @@ public class Apply extends TimeEntity {
   @Column
   private boolean isSelected;
 
+  @Column
+  private String reason;
+
   @ManyToOne(fetch = FetchType.LAZY)
   private Post post;
 

@@ -21,6 +21,9 @@ public class Analysis {
   private String result;
 
   @Column(nullable = false)
+  private String summary;
+
+  @Column(nullable = false)
   private int score;
 
   @ManyToOne(fetch = FetchType.LAZY)
