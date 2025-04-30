@@ -1,6 +1,7 @@
 package aibe.hosik.post.entity;
 
 import aibe.hosik.common.TimeEntity;
+import aibe.hosik.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -43,4 +44,7 @@ public class Post extends TimeEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private PostType type;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  private User user;
 }
