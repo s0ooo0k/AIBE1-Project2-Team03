@@ -23,6 +23,9 @@ public class Profile {
   @Column
   private String image;
 
+  @Column
+  private String nickname;
+
   @OneToOne
   private User user;
 }
