@@ -1,6 +1,9 @@
-package aibe.hosik.apply;
+package aibe.hosik.apply.repository;
 
+import aibe.hosik.apply.entity.Apply;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApplyRepository extends JpaRepository<Apply, Long> {
+    // post id로 지원서 조회
+
 }
