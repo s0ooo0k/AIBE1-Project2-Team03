@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ public class PostController {
     // dto 반환
     // TODO : currentCount 로직 구현 후 변환
     PostResponseDTO responseDTO = PostResponseDTO.from(createPost, skills, 0);
-    return ResponseEntity.ok(responseDTO);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
   // 테스트용
   @Operation(summary="모집글 등록 테스트", description="[TEST] 모집글을 등록합니다.")
@@ -50,7 +51,7 @@ public class PostController {
     Post createPost = postService.createPost(dto, mockUser);
     List<String> skills = postSkillRepository.findSkillByPostId(createPost.getId());
     PostResponseDTO responseDTO = PostResponseDTO.from(createPost, skills, 0);
-    return ResponseEntity.ok(responseDTO);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
   @Operation(summary="모집글 조회", description = "모집글 목록을 조회합니다.")
