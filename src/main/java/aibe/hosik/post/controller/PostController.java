@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// 테스트
 @Slf4j
 @RestController
 @RequestMapping("/api/posts")
