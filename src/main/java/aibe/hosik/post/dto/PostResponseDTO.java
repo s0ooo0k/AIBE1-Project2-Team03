@@ -1,7 +1,6 @@
 package aibe.hosik.post.dto;
 
 import aibe.hosik.post.entity.Post;
-import io.jsonwebtoken.security.PublicJwk;
 
 import java.util.List;
 

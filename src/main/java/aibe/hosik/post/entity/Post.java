@@ -56,5 +56,6 @@ public class Post extends TimeEntity {
   
   // 양방향 매핑
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<PostSkill> postSkills = new ArrayList<>();
 }
