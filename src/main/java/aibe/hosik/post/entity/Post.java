@@ -1,11 +1,14 @@
 package aibe.hosik.post.entity;
 
 import aibe.hosik.common.TimeEntity;
+import aibe.hosik.skill.entity.PostSkill;
 import aibe.hosik.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -34,6 +37,9 @@ public class Post extends TimeEntity {
   @Column
   private String image;
 
+  @Column
+  private String requirementPersonality;
+
   @Column(nullable = false)
   private LocalDate endedAt;
 
@@ -47,4 +53,8 @@ public class Post extends TimeEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   private User user;
+  
+  // 양방향 매핑
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<PostSkill> postSkills = new ArrayList<>();
 }

@@ -1,5 +1,6 @@
-package aibe.hosik.skill;
+package aibe.hosik.skill.service;
 
+import aibe.hosik.skill.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
