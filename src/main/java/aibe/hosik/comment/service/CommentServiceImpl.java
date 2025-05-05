@@ -10,6 +10,7 @@ import aibe.hosik.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -23,7 +24,14 @@ public class CommentServiceImpl implements CommentService{
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
+    /**
+     * 새로운 댓글을 생성합니다.
+     *
+     * @param dto 댓글 작성 정보를 담고 있는 DTO 객체
+     * @param user 댓글을 작성하는 사용자 정보
+     */
     @Override
+    @Transactional
     public void createComment(CommentRequestDTO dto, User user) {
         // post id로 게시글 찾기
         Post post = postRepository.findById(dto.postId())
@@ -41,7 +49,14 @@ public class CommentServiceImpl implements CommentService{
         commentRepository.save(comment);
     }
 
+    /**
+     * 지정된 게시글 ID에 속한 모든 댓글을 검색하고, 부모-자식 관계에 따라 데이터를 계층적으로 정리하여 반환합니다.
+     *
+     * @param postId 댓글을 조회하고자 하는 게시글의 ID
+     * @return 지정된 게시글 ID에 속하는 모든 부모 댓글이 포함된 리스트. 각 댓글은 자식 댓글을 포함하여 계층적으로 표현됨.
+     */
     @Override
+    @Transactional
     public List<CommentResponseDTO> getCommentsByPostId(Long postId) {
         // postId의 댓글 모두 찾기
         List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
@@ -66,4 +81,21 @@ public class CommentServiceImpl implements CommentService{
         return roots;
     }
 
+    /**
+     * 특정 댓글을 삭제합니다. 삭제하려는 댓글이 현재 사용자가 작성한 댓글인지 확인하는 과정을 포함합니다.
+     *
+     * @param commentId 삭제할 댓글의 ID
+     * @param user 요청을 수행하는 사용자 정보
+     * @throws ResponseStatusException 댓글 작성자가 아닌 경우 삭제가 허용되지 않음
+     */
+    @Override
+    public void deleteComment(Long commentId, User user) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow();
+
+        if(!comment.getUser().getId().equals(user.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "댓글 작성자만 삭제할 수 있습니다");
+        }
+        commentRepository.delete(comment);
+    }
 }

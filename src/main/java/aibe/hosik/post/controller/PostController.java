@@ -110,41 +110,4 @@ public class PostController {
     PostResponseDTO responseDTO = PostResponseDTO.from(updatedPost, skills, 0); 
     return ResponseEntity.ok(responseDTO);
   }
-
-
-  // ========= Swagger 테스트 mock
-  @Operation(summary="[로컬 TEST용] 모집글 등록 테스트", description="[TEST] 모집글을 등록합니다.")
-  @PostMapping("/mock")
-  public ResponseEntity<?> createPostForSwagger(@RequestBody PostRequestDTO dto){
-
-    // 테스트용 userId
-    User mockUser = userRepository.findById(1L).orElseThrow();
-    Post createPost = postService.createPost(dto, mockUser);
-    List<String> skills = postSkillRepository.findSkillByPostId(createPost.getId());
-    // TODO : 현재 모집 인원 로직 추가 필요
-    PostResponseDTO responseDTO = PostResponseDTO.from(createPost, skills, 0);
-    return ResponseEntity.status(HttpStatus.CREATED).build();
-  }
-
-  @Operation(summary="[로컬 TEST용] 모집글 수정 테스트", description="[TEST] 모집글을 수정합니다.")
-  @PatchMapping("/{postId}/mock")
-  public ResponseEntity<?> updatePostForSwagger(@PathVariable Long postId,
-                                                @RequestBody PostPatchDTO dto) {
-
-    User mockUser = userRepository.findById(1L).orElseThrow();
-
-    Post updatedPost = postService.updatePost(postId, dto, mockUser);
-    List<String> skills = postSkillRepository.findSkillByPostId(updatedPost.getId());
-    PostResponseDTO responseDTO = PostResponseDTO.from(updatedPost, skills, 0);
-    return ResponseEntity.ok(responseDTO);
-  }
-
-  @Operation(summary="[로컬 TEST용] 모집글 삭제 테스트", description="[TEST] 테스트용 유저로 모집글을 삭제합니다.")
-  @DeleteMapping("/{postId}/mock")
-  public ResponseEntity<?> deletePostForSwagger(@PathVariable Long postId) {
-    User mockUser = userRepository.findById(1L).orElseThrow();
-
-    postService.deletePost(postId, mockUser);
-    return ResponseEntity.noContent().build();
-  }
 }
