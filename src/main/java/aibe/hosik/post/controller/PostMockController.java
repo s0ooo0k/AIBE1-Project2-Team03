@@ -5,6 +5,7 @@ import aibe.hosik.post.dto.PostPatchDTO;
 import aibe.hosik.post.dto.PostRequestDTO;
 import aibe.hosik.post.dto.PostResponseDTO;
 import aibe.hosik.post.entity.Post;
+import aibe.hosik.post.facade.PostFacade;
 import aibe.hosik.post.service.PostService;
 import aibe.hosik.skill.repository.PostSkillRepository;
 import aibe.hosik.user.User;
@@ -25,46 +26,35 @@ import java.util.List;
 @Tag(name = "[Mock] 모집글 테스트 API", description = "Swagger 테스트용 인증 없는 모집글 CRUD API")
 @Slf4j
 @RestController
-@RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@RequestMapping("/api/posts")
 public class PostMockController {
-    private final PostService postService;
+
+    private final PostFacade postFacade;
     private final UserRepository userRepository;
-    private final PostSkillRepository postSkillRepository;
 
-    // ========= Swagger 테스트 mock
-    @Operation(summary="[로컬 TEST용] 모집글 등록 테스트", description="[TEST] 모집글을 등록합니다.")
+    @Operation(summary = "[로컬 TEST용] 모집글 등록 테스트", description = "[TEST] 모집글을 등록합니다.")
     @PostMapping("/mock")
-    public ResponseEntity<?> createPostForSwagger(@RequestBody PostRequestDTO dto){
-
-        // 테스트용 userId
+    public ResponseEntity<PostResponseDTO> createPostForSwagger(@RequestBody PostRequestDTO dto) {
         User mockUser = userRepository.findById(1L).orElseThrow();
-        Post createPost = postService.createPost(dto, mockUser);
-        List<String> skills = postSkillRepository.findSkillByPostId(createPost.getId());
-        // TODO : 현재 모집 인원 로직 추가 필요
-        PostResponseDTO responseDTO = PostResponseDTO.from(createPost, skills, 0);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        PostResponseDTO responseDTO = postFacade.createPost(dto, mockUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
-    @Operation(summary="[로컬 TEST용] 모집글 수정 테스트", description="[TEST] 모집글을 수정합니다.")
+    @Operation(summary = "[로컬 TEST용] 모집글 수정 테스트", description = "[TEST] 모집글을 수정합니다.")
     @PatchMapping("/mock/{postId}")
-    public ResponseEntity<?> updatePostForSwagger(@PathVariable Long postId,
-                                                  @RequestBody PostPatchDTO dto) {
-
+    public ResponseEntity<PostResponseDTO> updatePostForSwagger(@PathVariable Long postId,
+                                                                @RequestBody PostPatchDTO dto) {
         User mockUser = userRepository.findById(1L).orElseThrow();
-
-        Post updatedPost = postService.updatePost(postId, dto, mockUser);
-        List<String> skills = postSkillRepository.findSkillByPostId(updatedPost.getId());
-        PostResponseDTO responseDTO = PostResponseDTO.from(updatedPost, skills, 0);
+        PostResponseDTO responseDTO = postFacade.updatePost(postId, dto, mockUser);
         return ResponseEntity.ok(responseDTO);
     }
 
-    @Operation(summary="[로컬 TEST용] 모집글 삭제 테스트", description="[TEST] 테스트용 유저로 모집글을 삭제합니다.")
+    @Operation(summary = "[로컬 TEST용] 모집글 삭제 테스트", description = "[TEST] 테스트용 유저로 모집글을 삭제합니다.")
     @DeleteMapping("/mock/{postId}")
     public ResponseEntity<?> deletePostForSwagger(@PathVariable Long postId) {
         User mockUser = userRepository.findById(1L).orElseThrow();
-
-        postService.deletePost(postId, mockUser);
+        postFacade.deletePost(postId, mockUser);
         return ResponseEntity.noContent().build();
     }
 }
