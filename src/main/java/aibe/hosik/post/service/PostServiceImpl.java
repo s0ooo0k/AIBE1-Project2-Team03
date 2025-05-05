@@ -25,7 +25,11 @@ public class PostServiceImpl implements PostService {
   private final SkillRepository skillRepository;
   private final PostSkillRepository postSkillRepository;
 
-  // PostResponseDTO를 통해 전체 게시글(Post)를 조회합니다
+  /**
+   * 모든 게시글을 조회하는 메서드입니다.
+   *
+   * @return 게시글 정보와 관련된 스킬 정보 및 현재 참여자 수를 포함한 PostResponseDTO 객체 리스트
+   */
   @Override
   public List<PostResponseDTO> getAllPosts() {
     // findAllWithSkills로 한 번에 fetch(post, postSkills, skill)
@@ -46,8 +50,13 @@ public class PostServiceImpl implements PostService {
             }).collect(Collectors.toList());
   }
 
-  // 주어진 PostRequestDTO와 User를 기반으로 새로운 게시글(Post)을 생성하고 저장합니다.
-  // 요청된 스킬 리스트를 기준으로 스킬을 찾거나 새로 생성하여 Post와 연결합니다.
+  /**
+   * 게시글을 생성하고 저장하는 메서드입니다.
+   *
+   * @param dto 게시글 생성에 필요한 정보를 담고 있는 PostRequestDTO 객체
+   * @param user 게시글 생성 요청을 보낸 사용자 객체
+   * @return 저장된 게시글 객체
+   */
   @Override
   public Post createPost(PostRequestDTO dto, User user) {
     // toEntity 사용해서 Post 객체 생성
@@ -72,6 +81,12 @@ public class PostServiceImpl implements PostService {
     return savePost;
   }
 
+  /**
+   * 특정 게시글의 상세 정보를 조회하는 메서드입니다.
+   *
+   * @param postId 상세 정보를 조회하려는 게시글의 ID
+   * @return 게시글 정보, 관련된 스킬 정보, 매칭 사용자 정보를 포함한 PostDetailDTO 객체
+   */
   @Override
   public PostDetailDTO getPostDetail(Long postId) {
     // 게시글 정보 조회

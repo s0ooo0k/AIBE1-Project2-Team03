@@ -30,6 +30,13 @@ public class PostController {
   private final UserRepository userRepository;
   private final PostSkillRepository postSkillRepository;
 
+  /**
+   * 게시글을 등록하는 메서드입니다.
+   *
+   * @param dto 게시글 등록 요청 정보를 담고 있는 DTO 객체
+   * @param user 인증된 사용자 정보
+   * @return ResponseEntity 생성된 게시글에 대한 응답 객체
+   */
   @Operation(summary="모집글 등록", description="모집글을 등록합니다.")
   @PostMapping
   public ResponseEntity<?> createPost(@RequestBody PostRequestDTO dto, @AuthenticationPrincipal User user){
@@ -41,25 +48,24 @@ public class PostController {
     PostResponseDTO responseDTO = PostResponseDTO.from(createPost, skills, 0);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
-  // 테스트용
-  @Operation(summary="모집글 등록 테스트", description="[TEST] 모집글을 등록합니다.")
-  @PostMapping("/mock")
-  public ResponseEntity<?> createPostForSwagger(@RequestBody PostRequestDTO dto){
 
-    // 테스트용 userId
-    User mockUser = userRepository.findById(1L).orElseThrow();
-    Post createPost = postService.createPost(dto, mockUser);
-    List<String> skills = postSkillRepository.findSkillByPostId(createPost.getId());
-    PostResponseDTO responseDTO = PostResponseDTO.from(createPost, skills, 0);
-    return ResponseEntity.status(HttpStatus.CREATED).build();
-  }
-
+  /**
+   * 모든 모집글을 조회하는 메서드입니다.
+   *
+   * @return ResponseEntity로 감싸진 모집글 목록(PostResponseDTO 리스트)를 반환합니다.
+   */
   @Operation(summary="모집글 조회", description = "모집글 목록을 조회합니다.")
   @GetMapping
   public ResponseEntity<List<PostResponseDTO>> getAllPosts(){
     return ResponseEntity.ok(postService.getAllPosts());
   }
 
+  /**
+   * 주어진 모집글 ID를 통해 모집글 상세 정보를 조회하는 메서드입니다.
+   *
+   * @param postId 상세 정보를 조회하고자 하는 모집글의 ID
+   * @return ResponseEntity로 감싸진 모집글 상세 정보(PostDetailDTO 객체)를 반환합니다.
+   */
   @Operation(summary="모집글 상세 조회", description="모집글 게시글을 상세 조회합니다")
   @GetMapping("/{postId}")
   public ResponseEntity<PostDetailDTO> getPostDetail(@PathVariable Long postId){
