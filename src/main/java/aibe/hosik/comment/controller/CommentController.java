@@ -1,5 +1,6 @@
-package aibe.hosik.comment;
+package aibe.hosik.comment.controller;
 
+import aibe.hosik.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
