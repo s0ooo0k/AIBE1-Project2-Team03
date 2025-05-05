@@ -49,6 +49,19 @@ public class PostController {
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
+  // 테스트용
+  @Operation(summary="모집글 등록 테스트", description="[TEST] 모집글을 등록합니다.")
+  @PostMapping("/mock")
+  public ResponseEntity<?> createPostForSwagger(@RequestBody PostRequestDTO dto){
+
+    // 테스트용 userId
+    User mockUser = userRepository.findById(1L).orElseThrow();
+    Post createPost = postService.createPost(dto, mockUser);
+    List<String> skills = postSkillRepository.findSkillByPostId(createPost.getId());
+    PostResponseDTO responseDTO = PostResponseDTO.from(createPost, skills, 0);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
+
   /**
    * 모든 모집글을 조회하는 메서드입니다.
    *
@@ -70,5 +83,12 @@ public class PostController {
   @GetMapping("/{postId}")
   public ResponseEntity<PostDetailDTO> getPostDetail(@PathVariable Long postId){
     return ResponseEntity.ok(postService.getPostDetail(postId));
+  }
+
+  @Operation(summary="모집글 삭제", description ="작성자는 모집글을 삭제합니다")
+  @DeleteMapping("/{postId}")
+  public ResponseEntity<?> deletePost(@PathVariable Long postId, @AuthenticationPrincipal User user){
+    postService.deletePost(postId);
+    return ResponseEntity.noContent().build();
   }
 }

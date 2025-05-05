@@ -12,4 +12,6 @@ public interface PostService {
   List<PostResponseDTO> getAllPosts();
   Post createPost(PostRequestDTO dto, User user);
   PostDetailDTO getPostDetail(Long postId);
+  void deletePost(Long postId);
+  Post updatePost(Long postId, PostRequestDTO dto);
 }

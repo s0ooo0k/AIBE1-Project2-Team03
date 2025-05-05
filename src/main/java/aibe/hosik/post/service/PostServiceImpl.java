@@ -12,7 +12,9 @@ import aibe.hosik.skill.entity.PostSkill;
 import aibe.hosik.skill.entity.Skill;
 import aibe.hosik.user.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,5 +105,21 @@ public class PostServiceImpl implements PostService {
     List<MatchedUserDTO> matchedUsers = new ArrayList<>();
 
     return PostDetailDTO.from(post,skills, matchedUsers);
+  }
+
+  /**
+   * 특정 게시글을 삭제하는 메서드입니다.
+   *
+   * @param postId 삭제하려는 게시글의 ID
+   * @throws ResponseStatusException 작성자가 아닐 경우, HTTP 상태 코드 FORBIDDEN과 함께 예외 발생
+   */
+  @Override
+  public void deletePost(Long postId) {
+    Post post = postRepository.findById(postId)
+            .orElseThrow();
+    if(!post.getUser().getId().equals(post.getUser().getId())){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 삭제할 수 있습니다");
+    }
+    postRepository.delete(post);
   }
 }
