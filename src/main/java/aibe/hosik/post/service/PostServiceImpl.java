@@ -1,9 +1,6 @@
 package aibe.hosik.post.service;
 
-import aibe.hosik.post.dto.MatchedUserDTO;
-import aibe.hosik.post.dto.PostDetailDTO;
-import aibe.hosik.post.dto.PostRequestDTO;
-import aibe.hosik.post.dto.PostResponseDTO;
+import aibe.hosik.post.dto.*;
 import aibe.hosik.post.entity.Post;
 import aibe.hosik.post.repository.PostRepository;
 import aibe.hosik.skill.repository.PostSkillRepository;
@@ -14,6 +11,7 @@ import aibe.hosik.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -60,6 +58,7 @@ public class PostServiceImpl implements PostService {
    * @return 저장된 게시글 객체
    */
   @Override
+  @Transactional
   public Post createPost(PostRequestDTO dto, User user) {
     // toEntity 사용해서 Post 객체 생성
     Post post = dto.toEntity(user);
@@ -114,12 +113,44 @@ public class PostServiceImpl implements PostService {
    * @throws ResponseStatusException 작성자가 아닐 경우, HTTP 상태 코드 FORBIDDEN과 함께 예외 발생
    */
   @Override
-  public void deletePost(Long postId) {
+  @Transactional
+  public void deletePost(Long postId, User user) {
     Post post = postRepository.findById(postId)
             .orElseThrow();
-    if(!post.getUser().getId().equals(post.getUser().getId())){
+    if(post.getUser() == null || !post.getUser().getId().equals(user.getId())){
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 삭제할 수 있습니다");
     }
     postRepository.delete(post);
+  }
+
+  @Override
+  @Transactional
+  public Post updatePost(Long postId, PostPatchDTO dto, User user) {
+    Post post = postRepository.findById(postId)
+            .orElseThrow();
+    if(!post.getUser().getId().equals(user.getId())){
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 삭제할 수 있습니다");
+    }
+
+    // 엔티티 메서드 이용해서 수정
+    post.updatePatch(dto);
+
+    if(dto.skills() != null){
+      postSkillRepository.deleteByPostId(postId);
+      for(String skillName : dto.skills()) {
+        Skill skill = skillRepository.findByName(skillName)
+                .orElseGet(() -> skillRepository.save(Skill.builder().name(skillName).build()));
+
+        PostSkill postSkill = PostSkill.builder()
+                .post(post)
+                .skill(skill)
+                .build();
+
+        // post-skill 연관관계 추가
+        postSkillRepository.save(postSkill);
+      }
+    }
+
+    return postRepository.save(post);
   }
 }
