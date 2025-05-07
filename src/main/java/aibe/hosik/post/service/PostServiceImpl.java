@@ -53,20 +53,21 @@ public class PostServiceImpl implements PostService {
   /**
    * 게시글을 생성하고 저장하는 메서드입니다.
    *
-   * @param dto 게시글 생성에 필요한 정보를 담고 있는 PostRequestDTO 객체
+   * @param dto  게시글 생성에 필요한 정보를 담고 있는 PostRequestDTO 객체
    * @param user 게시글 생성 요청을 보낸 사용자 객체
    * @return 저장된 게시글 객체
    */
   @Override
   @Transactional
-  public Post createPost(PostRequestDTO dto, User user) {
+  public PostResponseDTO createPost(PostRequestDTO dto, User user) {
     // toEntity 사용해서 Post 객체 생성
     Post post = dto.toEntity(user);
     // 생성한 객체 Post 저장
     Post savePost = postRepository.save(post);
-
+    
+    // 연관된 skill 정보 저장
+    List<String> skills = new ArrayList<>();
     // Skill 찾거나 생성
-    // 추후 stream으로 전환
     for(String skillName : dto.skills()) {
       Skill skill = skillRepository.findByName(skillName)
               .orElseGet(() -> skillRepository.save(Skill.builder().name(skillName).build()));
@@ -78,8 +79,12 @@ public class PostServiceImpl implements PostService {
 
       // post-skill 연관관계 추가
       postSkillRepository.save(postSkill);
+      // 응답 DTO 스킬 저장
+      skills.add(skill.getName());
     }
-    return savePost;
+    // TODO: 참여자 수 계산 로직 필요
+    int currentCount = 0;
+    return PostResponseDTO.from(savePost, skills, currentCount);
   }
 
   /**
@@ -125,7 +130,7 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public Post updatePost(Long postId, PostPatchDTO dto, User user) {
+  public PostResponseDTO updatePost(Long postId, PostPatchDTO dto, User user) {
     Post post = postRepository.findById(postId)
             .orElseThrow();
     if(!post.getUser().getId().equals(user.getId())){
@@ -135,8 +140,10 @@ public class PostServiceImpl implements PostService {
     // 엔티티 메서드 이용해서 수정
     post.updatePatch(dto);
 
+    List<String> skills = new ArrayList<>();
     if(dto.skills() != null){
       postSkillRepository.deleteByPostId(postId);
+
       for(String skillName : dto.skills()) {
         Skill skill = skillRepository.findByName(skillName)
                 .orElseGet(() -> skillRepository.save(Skill.builder().name(skillName).build()));
@@ -148,9 +155,16 @@ public class PostServiceImpl implements PostService {
 
         // post-skill 연관관계 추가
         postSkillRepository.save(postSkill);
+        skills.add(skill.getName());
       }
+    } else {
+      skills = post.getPostSkills().stream()
+              .map(s -> s.getSkill().getName())
+              .collect(Collectors.toList());
     }
 
-    return postRepository.save(post);
+    // TODO: 참여자 수 계산 로직 필요
+    int currentCount = 0;
+    return PostResponseDTO.from(post, skills, currentCount);
   }
 }
