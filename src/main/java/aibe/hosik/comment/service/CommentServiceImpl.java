@@ -89,6 +89,7 @@ public class CommentServiceImpl implements CommentService{
      * @throws ResponseStatusException 댓글 작성자가 아닌 경우 삭제가 허용되지 않음
      */
     @Override
+    @Transactional
     public void deleteComment(Long commentId, User user) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow();
