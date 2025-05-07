@@ -1,4 +1,4 @@
-package aibe.hosik.service;
+package aibe.hosik.auth.service;
 
 import aibe.hosik.dto.SignUpRequest;
 import aibe.hosik.model.entity.LocalUser;
