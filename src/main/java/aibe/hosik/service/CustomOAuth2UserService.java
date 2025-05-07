@@ -1,9 +1,8 @@
 package aibe.hosik.service;
 
-import aibe.hosik.model.entity.GithubUser;
-import aibe.hosik.model.entity.KakaoUser;
-import aibe.hosik.model.repository.GithubUserRepository;
-import aibe.hosik.model.repository.KakaoUserRepository;
+import aibe.hosik.model.entity.SocialType;
+import aibe.hosik.model.entity.SocialUser;
+import aibe.hosik.model.repository.SocialUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -20,48 +19,42 @@ import java.util.Map;
 @Log
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
-    private final KakaoUserRepository kakaoUserRepository;
-    private final GithubUserRepository githubUserRepository;
+    private final SocialUserRepository socialUserRepository;
 
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-        String regId = userRequest.getClientRegistration().getRegistrationId();
-        if ("kakao".equals(regId)) {
+        String username;
+        String name;
+        SocialType type;
+
+        if ("github".equals(registrationId)) {
+            Map<String, Object> attrs = oAuth2User.getAttributes();
+            username = "github_" + attrs.get("login");
+            name = (String) attrs.get("name");
+            type = SocialType.GITHUB;
+        } else {
             Map<String, Object> attrs = oAuth2User.getAttributes();
             Map<String, Object> kakaoAccount = (Map<String, Object>) attrs.get("kakao_account");
             Map<String, Object> kakaoProfile = (Map<String, Object>) kakaoAccount.get("profile");
-            String kakaoId = String.valueOf(attrs.get("id"));
-            String nickname = (String) kakaoProfile.get("nickname");
-            String username = "kakao_" + kakaoId;
-
-            KakaoUser user = kakaoUserRepository.findByUsername(username)
-                    .orElseGet(() -> {
-                        KakaoUser u = new KakaoUser();
-                        u.setUsername(username);
-                        u.setName(nickname);
-                        return kakaoUserRepository.save(u);
-                    });
-            log.info("Kakao login: " + user);
-
-        } else if ("github".equals(regId)) {
-            Map<String, Object> attrs = oAuth2User.getAttributes();
-            String login = (String) attrs.get("login");
-            String name  = (String) attrs.get("name");
-            String username = "github_" + login;
-
-            GithubUser user = githubUserRepository.findByUsername(username)
-                    .orElseGet(() -> {
-                        GithubUser u = new GithubUser();
-                        u.setUsername(username);
-                        u.setName(name);
-                        return githubUserRepository.save(u);
-                    });
-            log.info("GitHub login: " + user);
+            username = "kakao_" + attrs.get("id").toString();
+            name = (String) kakaoProfile.get("nickname");
+            type = SocialType.KAKAO;
         }
 
+        SocialUser socialUser = socialUserRepository.findByUsername(username)
+                .orElseGet(() -> socialUserRepository.save(
+                        SocialUser.builder()
+                                .username(username)
+                                .name(name)
+                                .socialType(type)
+                                .build()
+                ));
+
+        log.info("OAuth2 login: " + socialUser);
         return oAuth2User;
     }
 }

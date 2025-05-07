@@ -1,5 +1,6 @@
 package aibe.hosik.auth;
 
+import aibe.hosik.model.entity.SocialType;
 import aibe.hosik.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -21,6 +22,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -46,6 +48,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/auth/signup", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/auth/login").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/data/**").authenticated()
                         .anyRequest().permitAll()
@@ -58,7 +61,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/auth/login")
-                        .userInfoEndpoint(u -> u
+                        .userInfoEndpoint(userlnfo -> userlnfo
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oauth2SuccessHandler())
@@ -107,20 +110,29 @@ public class SecurityConfig {
             String regId = oauth.getAuthorizedClientRegistrationId();
             OAuth2User user = oauth.getPrincipal();
 
-            String username = switch (regId) {
-                case "github" -> "github_" + user.getAttribute("login");
-                default        -> "kakao_"  + user.getAttribute("id").toString();
-            };
+            SocialType socialType;
+            try {
+                socialType = SocialType.valueOf(regId.toUpperCase());
+            }catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("지원하지 않음 "  + regId);
+            }
+            String username;
+            switch (socialType) {
+            case GITHUB ->
+                    username = "github_" + user.getAttribute("login");
+            case KAKAO  ->
+                    username = "kakao_"  + user.getAttribute("id").toString();
+            default     -> throw new IllegalArgumentException("처리되지 않은 소셜 타입: " + socialType);
+            }
 
             String token = jwtTokenProvider.generateToken(
-                    new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(username, "")
+                    new UsernamePasswordAuthenticationToken(username, "")
             );
 
             String redirectUrl = UriComponentsBuilder
                     .fromUriString(frontEndRedirect)
                     .queryParam("token", token)
                     .build().toUriString();
-
             response.sendRedirect(redirectUrl);
         };
     }
