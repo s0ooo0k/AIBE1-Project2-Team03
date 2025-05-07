@@ -15,8 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -40,14 +38,14 @@ class PostServiceTest {
                 .orElseThrow(() -> new RuntimeException("테스트 유저가 없습니다."));
 
         PostRequestDTO dto = new PostRequestDTO(
-                "테스트 제목", "테스트 내용", 3, null,
+                "테스트 제목", "테스트 내용", 3,
                 "ENFP", LocalDate.now().plusDays(7),
                 PostCategory.PROJECT, PostType.ONLINE,
                 List.of("Java", "Spring")
         );
 
         MockMultipartFile image = new MockMultipartFile(
-                "image", "test.jpg", "image/jpeg", new FileInputStream(new File("src/test/java/aibe/hosik/23.png"))
+                "image", "test.jpg", "image/jpeg", "테스트 이미지".getBytes()
         );
 
         PostResponseDTO response = postService.createPost(dto, image, user);
