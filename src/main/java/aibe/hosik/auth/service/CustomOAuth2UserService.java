@@ -1,8 +1,8 @@
-package aibe.hosik.service;
+package aibe.hosik.auth.service;
 
-import aibe.hosik.model.entity.SocialType;
-import aibe.hosik.model.entity.SocialUser;
-import aibe.hosik.model.repository.SocialUserRepository;
+import aibe.hosik.auth.model.entity.SocialType;
+import aibe.hosik.auth.model.entity.SocialUser;
+import aibe.hosik.auth.model.repository.SocialUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -33,13 +33,25 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         if ("github".equals(registrationId)) {
             Map<String, Object> attrs = oAuth2User.getAttributes();
+            if (attrs == null || !attrs.containsKey("login") || !attrs.containsKey("name")) {
+                throw new OAuth2AuthenticationException("GitHub 사용자 정보가 유효하지 않습니다.");
+            }
             username = "github_" + attrs.get("login");
             name = (String) attrs.get("name");
             type = SocialType.GITHUB;
         } else {
             Map<String, Object> attrs = oAuth2User.getAttributes();
+            if (attrs == null || !attrs.containsKey("id")) {
+                throw new OAuth2AuthenticationException("Kakao 사용자 정보가 유효하지 않습니다.");
+            }
             Map<String, Object> kakaoAccount = (Map<String, Object>) attrs.get("kakao_account");
+            if (kakaoAccount == null || !kakaoAccount.containsKey("profile")) {
+                throw new OAuth2AuthenticationException("Kakao 계정 정보가 유효하지 않습니다.");
+            }
             Map<String, Object> kakaoProfile = (Map<String, Object>) kakaoAccount.get("profile");
+            if (kakaoProfile == null || !kakaoProfile.containsKey("nickname")) {
+                throw new OAuth2AuthenticationException("Kakao 프로필 정보가 유효하지 않습니다.");
+            }
             username = "kakao_" + attrs.get("id").toString();
             name = (String) kakaoProfile.get("nickname");
             type = SocialType.KAKAO;
