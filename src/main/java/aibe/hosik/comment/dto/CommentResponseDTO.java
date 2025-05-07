@@ -20,7 +20,7 @@ public record CommentResponseDTO(
         return new CommentResponseDTO(
                 comment.getId(),
                 comment.getContent(),
-                comment.getContent(),
+                comment.getUser().getName(),
                 comment.getCreatedAt(),
                 new ArrayList<>()
         );
