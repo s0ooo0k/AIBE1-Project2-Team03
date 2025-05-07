@@ -1,8 +1,6 @@
 # TEAMO !
 > AIBE1 TEAM03 호식이세마리 | 팀원 준비 완료! 팀워크가 필요할 땐, Teamo
 
-
-
 ### ✅ application-dev.yml
 ```yml
 server:
@@ -20,7 +18,7 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/kakao"
             scope:
               - profile_nickname
-             # - account_email
+              # - account_email
           github:
             client-id:
             client-secret:
@@ -61,4 +59,4 @@ jwt:
   expiration-ms: 3600000  # 1시간
 front-end:
   redirect: http://localhost:3000/oauth2/redirect
-````
+```
