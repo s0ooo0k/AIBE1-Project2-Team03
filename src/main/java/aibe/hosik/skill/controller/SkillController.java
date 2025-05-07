@@ -1,4 +1,4 @@
-package aibe.hosik.skill.cotnroller;
+package aibe.hosik.skill.controller;
 
 import aibe.hosik.skill.service.SkillService;
 import lombok.RequiredArgsConstructor;
