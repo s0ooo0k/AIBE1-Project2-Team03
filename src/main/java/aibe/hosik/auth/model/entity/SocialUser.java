@@ -1,4 +1,4 @@
-package aibe.hosik.model.entity;
+package aibe.hosik.auth.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

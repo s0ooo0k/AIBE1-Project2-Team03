@@ -1,9 +1,9 @@
-package aibe.hosik.service;
+package aibe.hosik.auth.service;
 
-import aibe.hosik.model.entity.LocalUser;
-import aibe.hosik.model.entity.SocialUser;
-import aibe.hosik.model.repository.LocalUserRepository;
-import aibe.hosik.model.repository.SocialUserRepository;
+import aibe.hosik.auth.model.entity.LocalUser;
+import aibe.hosik.auth.model.entity.SocialUser;
+import aibe.hosik.auth.model.repository.LocalUserRepository;
+import aibe.hosik.auth.model.repository.SocialUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.security.core.userdetails.*;
@@ -18,6 +18,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (username == null || username.isEmpty()) {
+                    throw new UsernameNotFoundException("유저가 없습니다.");
+                }
         if (username.startsWith("github_") || username.startsWith("kakao_")) {
             SocialUser user = socialUserRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("유저가 없습니다: " + username));
