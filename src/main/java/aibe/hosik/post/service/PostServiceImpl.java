@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class PostServiceImpl implements PostService {
   private final PostRepository postRepository;
   private final SkillRepository skillRepository;
   private final PostSkillRepository postSkillRepository;
+  private final StorageService storageService;
 
   /**
    * 모든 게시글을 조회하는 메서드입니다.
@@ -50,18 +52,21 @@ public class PostServiceImpl implements PostService {
             }).collect(Collectors.toList());
   }
 
-  /**
-   * 게시글을 생성하고 저장하는 메서드입니다.
-   *
-   * @param dto  게시글 생성에 필요한 정보를 담고 있는 PostRequestDTO 객체
-   * @param user 게시글 생성 요청을 보낸 사용자 객체
-   * @return 저장된 게시글 객체
-   */
+
   @Override
   @Transactional
-  public PostResponseDTO createPost(PostRequestDTO dto, User user) {
+  public PostResponseDTO createPost(PostRequestDTO dto, MultipartFile image, User user) {
+    String imageUrl = null;
+    if (image != null && !image.isEmpty()) {
+      try {
+        imageUrl = storageService.upload(image); // Supabase에 업로드 후 URL 획득
+      } catch (Exception e) {
+        throw new RuntimeException("이미지 업로드 실패", e);
+      }
+    }
+
     // toEntity 사용해서 Post 객체 생성
-    Post post = dto.toEntity(user);
+    Post post = dto.toEntity(user, imageUrl);
     // 생성한 객체 Post 저장
     Post savePost = postRepository.save(post);
     
@@ -130,11 +135,20 @@ public class PostServiceImpl implements PostService {
 
   @Override
   @Transactional
-  public PostResponseDTO updatePost(Long postId, PostPatchDTO dto, User user) {
+  public PostResponseDTO updatePost(Long postId, PostPatchDTO dto, MultipartFile image, User user) {
     Post post = postRepository.findById(postId)
             .orElseThrow();
     if(!post.getUser().getId().equals(user.getId())){
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 삭제할 수 있습니다");
+    }
+
+    if (image != null && !image.isEmpty()) {
+      try {
+        String imageUrl = storageService.upload(image);
+        post.setImage(imageUrl);
+      } catch (Exception e) {
+        throw new RuntimeException("이미지 업로드 실패", e);
+      }
     }
 
     // 엔티티 메서드 이용해서 수정
