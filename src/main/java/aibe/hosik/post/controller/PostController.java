@@ -1,9 +1,6 @@
 package aibe.hosik.post.controller;
 
-import aibe.hosik.post.dto.PostDetailDTO;
-import aibe.hosik.post.dto.PostPatchDTO;
-import aibe.hosik.post.dto.PostRequestDTO;
-import aibe.hosik.post.dto.PostResponseDTO;
+import aibe.hosik.post.dto.*;
 import aibe.hosik.post.entity.Post;
 import aibe.hosik.post.facade.PostFacade;
 import aibe.hosik.post.service.PostService;
@@ -11,14 +8,19 @@ import aibe.hosik.skill.repository.PostSkillRepository;
 import aibe.hosik.user.User;
 import aibe.hosik.user.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -31,13 +33,15 @@ import java.util.List;
 public class PostController {
   private final PostFacade postFacade;
 
+  @SecurityRequirement(name = "JWT")
   @Operation(summary="모집글 등록", description="모집글을 등록합니다.")
-  @PostMapping
-  public ResponseEntity<?> createPost(@RequestBody PostRequestDTO dto, @AuthenticationPrincipal User user){
+  public ResponseEntity<?> createPost(@RequestPart("dto") PostRequestDTO dto,
+                                      @RequestPart(value="image") MultipartFile image,
+                                      @AuthenticationPrincipal User user){
     if (user == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
     }
-    PostResponseDTO responseDTO = postFacade.createPost(dto, user);
+    PostResponseDTO responseDTO = postFacade.createPost(dto, image, user);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 
@@ -63,9 +67,10 @@ public class PostController {
   @Operation(summary="모집글 수정", description="모집글을 수정합니다.")
   @PatchMapping("/{postId}")
   public ResponseEntity<?> updatePost(@PathVariable Long postId,
-                                      @RequestBody PostPatchDTO dto,
+                                      @RequestPart("dto") PostPatchDTO dto,
+                                      @RequestPart(value="image") MultipartFile image,
                                       @AuthenticationPrincipal User user) {
-    PostResponseDTO responseDTO = postFacade.updatePost(postId, dto, user);
+    PostResponseDTO responseDTO = postFacade.updatePost(postId, dto, image, user);
     return ResponseEntity.ok(responseDTO);
   }
 }
