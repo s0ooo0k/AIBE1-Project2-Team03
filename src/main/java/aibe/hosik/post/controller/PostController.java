@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+// 테스트
 @Slf4j
 @RestController
 @RequestMapping("/api/posts")
