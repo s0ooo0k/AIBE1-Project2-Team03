@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.List;
 
+// 테스트
 @Slf4j
 @RestController
 @RequestMapping("/api/posts")
